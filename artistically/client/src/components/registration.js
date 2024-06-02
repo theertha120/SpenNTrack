@@ -1,203 +1,184 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import "./registration.css";
+import axios from 'axios'; // Import axios for making HTTP requests
+import Login from "./login";
+
 
 export default function Registration() {
-    const [formData, setFormData] = useState({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        dob: "",
-        username: "",
-        password: "",
-        verifyPassword: "",
-    });
+    const [selectedDate, setSelectedDate] = useState("");
+    const [inputValue, setInputValue] = useState("");
+    const [inputEmail, setEmailValue] = useState("");
+    const [password, setPassword] = useState("");
+    const [verifyPassword, setVerifyPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+    const [firstName, setFirstName] = useState(""); // State for first name
+    const [lastName, setLastName] = useState(""); // State for last name
+    const [showDonereg, setShowDoneReg] = useState(false); // State to control the view
 
-    const [phoneError, setPhoneError] = useState("");
-    const [emailError, setEmailError] = useState("");
-    const [passwordError, setPasswordError] = useState("");
-    const [registrationSuccess, setRegistrationSuccess] = useState(false);
-    const [registrationError, setRegistrationError] = useState("");
-
-    useEffect(() => {
-        if (
-            formData.password.trim() !== "" &&
-            formData.verifyPassword.trim() !== "" &&
-            formData.password !== formData.verifyPassword
-        ) {
-            setPasswordError("Passwords do not match");
-        } else {
-            setPasswordError("");
-        }
-    }, [formData.password, formData.verifyPassword]);
+    const handleDoneregClick = () => {
+        setShowDoneReg(true); // Switch to the Login view when button is clicked
+    };
+    const handleDateChange = (e) => {
+        setSelectedDate(e.target.value);
+    };
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
+        const value = e.target.value;
 
-        // Validation logic here
-        if (name === "phone") {
-            if (value.length > 8) {
-                setPhoneError("Max of 8 numbers only");
-            } else {
-                setPhoneError("");
-            }
+        if (/^\d*$/.test(value) && value.length <= 8) {
+            setInputValue(value);
+            setErrorMessage("");
+        } else if (value.length > 8) {
+            setErrorMessage("Max of 8 numbers only");
         }
+    };
 
-        if (name === "email") {
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                setEmailError("Enter in email format");
+    const handleChange3 = (e) => {
+        const value = e.target.value;
+        setEmailValue(value);
+        if (value === "") {
+            setErrorMessage("");
+        } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            setEmailValue(value);
+            setErrorMessage("");
+        } else {
+            setErrorMessage("Enter in email format");
+        }
+    };
+
+    const handleChange2 = (e) => {
+        const { id, value } = e.target;
+
+        if (id === "password") {
+            setPassword(value);
+            if (verifyPassword !== "" && value !== verifyPassword) {
+                setErrorMessage("Passwords do not match");
             } else {
-                setEmailError("");
+                setErrorMessage("");
+            }
+        } else if (id === "verifyPassword") {
+            setVerifyPassword(value);
+            if (value === "" && password !== "") {
+                setErrorMessage("");
+            } else if (password !== "" && value !== password) {
+                setErrorMessage("Passwords do not match");
+            } else {
+                setErrorMessage("");
             }
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        // Form validation checks
-        if (phoneError || emailError || passwordError) {
-            return;
-        }
-
+    const handleRegistration = async () => {
         try {
-            // Send form data to backend server
-            const response = await axios.post(
-                "http://localhost:3000/register",
-                formData
-            );
-
-            // Handle successful registration
-            console.log(response.data);
-            setRegistrationSuccess(true);
+            const response = await axios.post('http://localhost:3001/auth/register', {
+                firstName: firstName, // Pass first name value
+                lastName: lastName, // Pass last name value
+                email: inputEmail,
+                phoneNumber: inputValue,
+                dateOfBirth: selectedDate,
+                password: password
+            });
+            console.log(response.data); // Handle successful registration response
+            setSuccessMessage("Registration successful"); // Set success message
+            setErrorMessage(""); // Clear any previous error messages
         } catch (error) {
-            // Handle registration error
-            console.error("Error registering user:", error);
-            setRegistrationError("Error registering user. Please try again.");
+            console.error('Error registering:', error.response.data.error);
+            setErrorMessage(error.response.data.error || 'Registration failed'); // Set error message
+            setSuccessMessage(""); // Clear any previous success messages
         }
-    };
-
-    const handleGoBack = () => {
-        // Handle navigation back to homepage
-        // For example: window.location.href = '/homepage';
     };
 
     return (
         <div className="form-container">
-            {registrationSuccess ? (
-                <div>
-                    <h2>Registration successful!</h2>
-                    <button onClick={handleGoBack}>Go back to Homepage</button>
-                </div>
+            {showDonereg ? (
+                <Login />
             ) : (
-                <form onSubmit={handleSubmit}>
+                <>
                     <h1>Registration Page</h1>
                     <div className="form-el">
                         <label className="label">First Name:</label>
                         <input
                             type="text"
                             className="input"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleChange}
-                            required
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)} // Update first name state
                         />
                     </div>
+                    <br />
                     <div className="form-el">
                         <label className="label">Last Name:</label>
                         <input
                             type="text"
                             className="input"
-                            name="lastName"
-                            value={formData.lastName}
-                            onChange={handleChange}
-                            required
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)} // Update last name state
                         />
                     </div>
+                    <br />
                     <div className="form-el">
                         <label className="label">Email ID:</label>
                         <input
-                            type="email"
                             className="input"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
+                            type="text"
+                            value={inputEmail}
+                            onChange={handleChange3}
+                            placeholder="Enter email"
                         />
-                        {emailError && <div style={{ color: "red" }}>{emailError}</div>}
                     </div>
+                    <br />
                     <div className="form-el">
                         <label className="label">Phone Number:</label>
                         <input
-                            type="tel"
                             className="input"
-                            name="phone"
-                            value={formData.phone}
+                            type="text"
+                            value={inputValue}
                             onChange={handleChange}
-                            required
+                            placeholder="Enter up to 8 numbers"
                         />
-                        {phoneError && <div style={{ color: "red" }}>{phoneError}</div>}
                     </div>
+                    <br />
                     <div className="form-el">
                         <label className="label">Date of Birth:</label>
                         <input
+                            className="date"
                             type="date"
-                            className="input"
-                            name="dob"
-                            value={formData.dob}
-                            onChange={handleChange}
-                            required
+                            value={selectedDate}
+                            onChange={handleDateChange}
                         />
                     </div>
-                    <div className="form-el">
-                        <label className="label">Username:</label>
-                        <input
-                            type="text"
-                            className="input"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                    <br />
                     <div className="form-el">
                         <label className="label">Password:</label>
                         <input
-                            type="password"
                             className="input"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={handleChange2}
                         />
                     </div>
+                    <br />
                     <div className="form-el">
                         <label className="label">Verify password:</label>
                         <input
-                            type="password"
                             className="input"
-                            name="verifyPassword"
-                            value={formData.verifyPassword}
-                            onChange={handleChange}
-                            required
+                            type="password"
+                            id="verifyPassword"
+                            value={verifyPassword}
+                            onChange={handleChange2}
                         />
-                        {passwordError && (
-                            <div style={{ color: "red" }}>{passwordError}</div>
-                        )}
                     </div>
-                    <div>
-                        <button type="submit" className="button">
-                            Submit
-                        </button>
-                    </div>
-                </form>
-            )}
-            {registrationError && <p>{registrationError}</p>}
-        </div>
+                    <br />
+                    {/* Display error messages */}
+                    {errorMessage && <div className="error">{errorMessage}</div>}
+                    {/* Display success message */}
+                    {successMessage && <div className="success">{successMessage}</div>}
+                    <br />
+                    <button className="button" onClick={handleRegistration}>Submit</button>
+                    <button className="button" onClick={handleDoneregClick} style={{ marginLeft: '10px' }}> Done </button>
+                </>)
+            }
+        </div >
     );
 }

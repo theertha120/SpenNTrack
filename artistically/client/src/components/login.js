@@ -1,15 +1,19 @@
 import React, { useState } from "react";
-import axios from "axios";
 import "./login.css";
+import axios from 'axios'; // Import axios for making HTTP requests
 import Registration from "./registration";
+import HomePage from "./HomePage";
 
 export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [showRegistration, setShowRegistration] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+    const [showRegistration, setShowRegistration] = useState(false); // State to control the view
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // State to control the login status
 
     const handleRegistrationClick = () => {
-        setShowRegistration(true);
+        setShowRegistration(true); // Switch to the Login view when button is clicked
     };
 
     const handleUsernameChange = (event) => {
@@ -20,30 +24,38 @@ export default function Login() {
         setPassword(event.target.value);
     };
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
+    const handleLogin = async () => {
         try {
-            const res = await axios.post("/api/users/login", { email: username, password });
-            console.log(res.data); // Do something with the token
-        } catch (err) {
-            console.error(err.response.data);
+            const response = await axios.post('http://localhost:3001/auth/login', { email: username, password: password });
+            console.log(response.data); // Handle successful login response
+            setSuccessMessage("Login successful"); // Set success message
+            setErrorMessage(""); // Clear error message
+            setIsLoggedIn(true);
+            // Redirect or set appropriate state upon successful login
+        } catch (error) {
+            console.error('Error logging in:', error.response.data.error);
+            setErrorMessage("Invalid username or password"); // Set error message
+            setSuccessMessage(""); // Clear success message
+            // Handle error response (display error message, etc.)
         }
     };
 
     return (
         <div className="col">
-            {showRegistration ? (
+            {isLoggedIn ? (
+                <HomePage />
+
+            ) : showRegistration ? (
                 <Registration />
             ) : (
                 <>
                     <img id="LOGO" src="LOGO.jpg" alt="Logo" />
-                    <p className="p1">Username:</p>
+                    <p className="p1">Email ID:</p>
                     <input
                         type="text"
                         value={username}
                         onChange={handleUsernameChange}
-                        placeholder="Enter Username"
+                        placeholder="Enter Email ID"
                         className="inp1"
                     />
                     <p className="p2">Password:</p>
@@ -54,7 +66,40 @@ export default function Login() {
                         placeholder="Enter Password"
                         className="inp2"
                     />
-                    <button className="enter_button" onClick={handleSubmit}>Enter</button>
+                    <button className="enter_button" onClick={handleLogin}>Enter</button>
+                    {errorMessage && (
+                        <p style={{
+                            color: "white",
+                            backgroundColor: "red",
+                            padding: "10px",
+                            borderRadius: "8px",
+                            position: "absolute",
+                            top: "67%",
+                            right: "30%",
+                            width: "350px",
+                            textAlign: "center",
+                            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)"
+                        }}>
+                            {errorMessage}
+                        </p>
+                    )}
+                    {successMessage && (
+                        <p style={{
+                            color: "white",
+                            backgroundColor: "green",
+                            padding: "10px",
+                            borderRadius: "8px",
+                            position: "absolute",
+                            top: "67%",
+                            right: "30%",
+                            width: "350px",
+                            textAlign: "center",
+                            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)"
+                        }}>
+                            {successMessage}
+                        </p>
+                    )}
+
                     <p className="p3">Don't have an account? </p>
                     <button className="register_button" onClick={handleRegistrationClick}>Register here!</button>
                 </>
