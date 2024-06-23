@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const authRoutes = require('./routes/authroutes'); // Import authentication routes
+const messageRoutes = require('./routes/messageRoutes'); // Import message routes
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -29,6 +30,8 @@ connection.connect((err) => {
 
 // Use authentication routes
 app.use('/auth', authRoutes);
+// Use message routes
+app.use('/messages', messageRoutes);
 
 // Start the server
 app.listen(PORT, () => {

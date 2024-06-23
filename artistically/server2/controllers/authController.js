@@ -56,7 +56,18 @@ const loginUser = (req, res) => {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
-        return res.status(200).json({ message: 'Login successful', user: results[0] });
+        const user = results[0];
+        return res.status(200).json({
+            message: 'Login successful',
+            user: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                id: user.id,
+                phone: user.phoneNumber,
+                dateOfBirth: user.dateOfBirth
+            }
+        });
     });
 };
 

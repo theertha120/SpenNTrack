@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 import ImageGrid from './ImageGrid';
 import Login from './login'; // Import the Login component
 import AboutUs from './AboutUs';
-import BackgroundSlider from './bgm';
+
 function Get_Started() {
     const [showLogin, setShowLogin] = useState(false); // State to control the view
 
@@ -15,8 +15,8 @@ function Get_Started() {
         <div>
             {showLogin ? (
                 <>
-                    <BackgroundSlider />
-                    <Login /> // Render Login component if showLogin is true
+
+                    <Login />
                 </>
             ) : (
                 <main style={{ padding: '0 50px' }}>

@@ -3,6 +3,7 @@ import "./login.css";
 import axios from 'axios'; // Import axios for making HTTP requests
 import Registration from "./registration";
 import HomePage from "./HomePage";
+import BackgroundSlider from './bgm';
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -11,6 +12,7 @@ export default function Login() {
     const [successMessage, setSuccessMessage] = useState("");
     const [showRegistration, setShowRegistration] = useState(false); // State to control the view
     const [isLoggedIn, setIsLoggedIn] = useState(false); // State to control the login status
+    const [user, setUser] = useState(null); // State to store user information
 
     const handleRegistrationClick = () => {
         setShowRegistration(true); // Switch to the Login view when button is clicked
@@ -31,6 +33,7 @@ export default function Login() {
             setSuccessMessage("Login successful"); // Set success message
             setErrorMessage(""); // Clear error message
             setIsLoggedIn(true);
+            setUser(response.data.user);
             // Redirect or set appropriate state upon successful login
         } catch (error) {
             console.error('Error logging in:', error.response.data.error);
@@ -41,14 +44,19 @@ export default function Login() {
     };
 
     return (
-        <div className="col">
+        <div>
             {isLoggedIn ? (
-                <HomePage />
+                <HomePage user={user} />
 
             ) : showRegistration ? (
-                <Registration />
+                <div className="col">
+                    <BackgroundSlider />
+                    <Registration />
+                </div>
+
             ) : (
-                <>
+                <div className="col">
+                    <BackgroundSlider />
                     <img id="LOGO" src="LOGO.jpg" alt="Logo" />
                     <p className="p1">Email ID:</p>
                     <input
@@ -102,7 +110,7 @@ export default function Login() {
 
                     <p className="p3">Don't have an account? </p>
                     <button className="register_button" onClick={handleRegistrationClick}>Register here!</button>
-                </>
+                </div>
             )}
         </div>
     );
