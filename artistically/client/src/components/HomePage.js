@@ -5,11 +5,15 @@ import EventsDiscovery from './EventsDiscovery';
 import Messages from './Messages';
 import Popover from '@mui/material/Popover';
 import TextField from '@mui/material/TextField';
+import axios from 'axios';
+import { ChakraProvider } from '@chakra-ui/react';
 
 function HomePage({ user }) {
     const [currentPage, setCurrentPage] = useState(null);
     const [contactId, setContactId] = useState('');
+    const [contactEmail, setContactEmail] = useState('');
     const [anchorEl, setAnchorEl] = useState(null);
+    const [error, setError] = useState('');
 
     const handleEventsClick = () => {
         setCurrentPage('events');
@@ -27,13 +31,21 @@ function HomePage({ user }) {
         setCurrentPage('job');
     };
 
-    const handleSendMessage = () => {
-        setCurrentPage('messages');
-        handleClose();
+    const handleSendMessage = async () => {
+        try {
+            const response = await axios.get(`http://localhost:3001/messages/${encodeURIComponent(contactEmail)}`);
+            setContactId(response.data.id);
+            setCurrentPage('messages');
+            handleClose();
+        } catch (error) {
+            console.error('Error fetching contact ID:', error);
+            setError('User not found');
+        }
     };
 
     const handleClose = () => {
         setAnchorEl(null);
+        setError(''); // Clear error message when closing the popover
     };
 
     const open = Boolean(anchorEl);
@@ -43,7 +55,7 @@ function HomePage({ user }) {
     const renderPage = () => {
         switch (currentPage) {
             case 'events':
-                return (<EventsDiscovery />);
+                return (<ChakraProvider><EventsDiscovery /></ChakraProvider>);
             case 'messages':
                 return (
                     <Messages userId={user.id} contactId={contactId} />
@@ -51,7 +63,6 @@ function HomePage({ user }) {
             default:
                 return (
                     <>
-                        console.log(user);
                         <div style={{ backgroundColor: 'white', minHeight: '100vh', borderRadius: '10px', padding: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Montserrat, sans-serif' }}>
                             <div style={{ textAlign: 'center', color: '#333', display: 'flex', alignItems: 'center' }}>
                                 <Avatar
@@ -159,13 +170,15 @@ function HomePage({ user }) {
                             }}
                         >
                             <div style={{ padding: '20px' }}>
+                                <p>Who would you like to message with?</p>
                                 <TextField
-                                    label="Contact ID"
+                                    label="Contact Email"
                                     variant="outlined"
-                                    value={contactId}
-                                    onChange={(e) => setContactId(e.target.value)}
+                                    value={contactEmail}
+                                    onChange={(e) => setContactEmail(e.target.value)}
                                     fullWidth
                                 />
+                                {error && <p style={{ color: 'red' }}>{error}</p>}
                                 <Button
                                     variant="contained"
                                     color="primary"

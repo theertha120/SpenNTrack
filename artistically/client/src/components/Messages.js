@@ -11,7 +11,7 @@ const Messages = ({ userId, contactId }) => {
             try {
                 const response = await axios.get(`http://localhost:3001/messages/${userId}/${contactId}`);
                 console.log('Fetch messages response:', response.data); // Log the response data
-                console.log(userId)
+                //console.log(userId)
                 setMessages(response.data);
             } catch (error) {
                 console.error('Error fetching messages:', error);
@@ -50,8 +50,9 @@ const Messages = ({ userId, contactId }) => {
         <div className="messages-container">
             <div className="messages-list">
                 {messages.map(msg => (
-                    <div key={msg.id} className={`message ${msg.senderId === userId ? 'sent' : 'received'}`}>
-                        <strong>{msg.senderId === userId ? 'You' : 'Contact'}:</strong> {msg.message}
+                    <div key={msg.id} className={`message ${msg.receiver_id === userId ? 'sent' : 'received'}`}>
+                        <strong>{msg.receiver_id === userId ? 'Contact' : 'You'}:</strong> {msg.message}
+
                     </div>
                 ))}
             </div>

@@ -40,7 +40,31 @@ const getMessages = (req, res) => {
     });
 };
 
+const getContactId = (req, res) => {
+    const { contactEmail } = req.params;
+
+    if (!contactEmail) {
+        return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const query = 'SELECT id FROM users WHERE email = ?';
+    connection.query(query, [contactEmail], (err, results) => {
+        if (err) {
+            console.error('Error fetching user ID:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ id: results[0].id });
+    });
+}
+
+
 module.exports = {
     sendMessage,
-    getMessages
+    getMessages,
+    getContactId
 };
