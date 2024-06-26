@@ -1,39 +1,38 @@
 const express = require('express');
 const mysql = require('mysql2');
-const authRoutes = require('./routes/authroutes'); // Import authentication routes
-const messageRoutes = require('./routes/messageRoutes'); // Import message routes
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const authRoutes = require('./routes/authroutes');
+const connRoutes = require('./routes/connectionRoutes');
+const messageRoutes = require('./routes/messageRoutes');
+const pendingRequestsRoutes = require('./routes/pendingRequests'); 
 
 const app = express();
+const PORT = process.env.PORT || 3001;
+
 app.use(cors());
+app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 3001; // Set port number
-
-// Middleware
-app.use(bodyParser.json()); // Parse JSON bodies
-
-// MySQL connection configuration
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'test',
-    database: 'artistically',
-
+    database: 'artistically'
 });
 
-// Connect to MySQL databasẻ
 connection.connect((err) => {
-    if (err) throw err;
+    if (err) {
+        console.error('Error connecting to database:', err);
+        throw err;
+    }
     console.log('Connected to MySQL database');
 });
 
-// Use authentication routes
 app.use('/auth', authRoutes);
-// Use message routes
 app.use('/messages', messageRoutes);
+app.use('/connections', connRoutes);
+app.use('/pending', pendingRequestsRoutes); // Use /pending instead of /pending-requests
 
-// Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
