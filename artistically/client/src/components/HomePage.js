@@ -111,7 +111,7 @@ function HomePage({ user }) {
                             Back to Home
                         </Button>
                         <ConnectionForm senderEmail={user.email} />
-                        <PendingRequests userEmail={user.email} /> {/* Add PendingRequests component */}
+                        <PendingRequests userEmail={user.email} /> 
                     </>
                 );
             default:
