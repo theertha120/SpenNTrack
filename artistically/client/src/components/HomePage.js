@@ -203,7 +203,11 @@ function HomePage({ user }) {
                                     Connections
                                 </Button>
                             </div>
+                            <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', textAlign:'center',fontFamily: 'Montserrat, sans-serif', color:'black' }}>
+                    <p>Here is where you can customize your profile, or add relevant skills. Do remember this profile will be displayed to other users and could potentially affect your hireability.</p>
+                </div>
                         </div>
+    
                     </>
                 );
         }
