@@ -9,7 +9,7 @@ import ConnectionForm from './ConnectionForm';
 import Messages from './Messages';
 import EventsDiscovery from './EventsDiscovery';
 import JobOpenings from './JobOpenings';
-import PendingRequests from './PendingRequests'; // Import PendingRequests component
+import PendingRequests from './PendingRequests'; 
 
 function HomePage({ user }) {
     const [currentPage, setCurrentPage] = useState(null);
@@ -54,7 +54,7 @@ function HomePage({ user }) {
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
 
-    // Function to render current page based on state
+    
     const renderPage = () => {
         switch (currentPage) {
             case 'events':
