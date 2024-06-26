@@ -15,13 +15,12 @@ import {
   ChakraProvider,
 } from "@chakra-ui/react";
 
-// Extend the theme to include custom colors, fonts, etc.
 const theme = extendTheme({
   styles: {
     global: {
       body: {
         color: "white",
-        bg: "black", // optional: if you want the background to be black
+        bg: "black", 
       },
     },
   },
