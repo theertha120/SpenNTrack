@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
-import EventsDiscovery from './EventsDiscovery';
-import Messages from './Messages';
 import Popover from '@mui/material/Popover';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
 import { ChakraProvider } from '@chakra-ui/react';
+import ConnectionForm from './ConnectionForm';
+import Messages from './Messages';
+import EventsDiscovery from './EventsDiscovery';
+import JobOpenings from './JobOpenings';
+import PendingRequests from './PendingRequests'; // Import PendingRequests component
 
 function HomePage({ user }) {
     const [currentPage, setCurrentPage] = useState(null);
@@ -15,16 +18,16 @@ function HomePage({ user }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const [error, setError] = useState('');
 
-    const handleEventsClick = () => {
-        setCurrentPage('events');
-    };
-
     const handleMessagesClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
 
     const handleConnectionsClick = () => {
         setCurrentPage('connections');
+    };
+
+    const handleEventsClick = () => {
+        setCurrentPage('events');
     };
 
     const handleJobClick = () => {
@@ -45,7 +48,7 @@ function HomePage({ user }) {
 
     const handleClose = () => {
         setAnchorEl(null);
-        setError(''); // Clear error message when closing the popover
+        setError('');
     };
 
     const open = Boolean(anchorEl);
@@ -55,15 +58,66 @@ function HomePage({ user }) {
     const renderPage = () => {
         switch (currentPage) {
             case 'events':
-                return (<ChakraProvider><EventsDiscovery /></ChakraProvider>);
+                return (
+                    <>
+                        <Button
+                            variant="outlined"
+                            style={{ marginBottom: '20px', backgroundColor: '#9C27B0', color: 'white', borderColor: '#6A1B9A' }}
+                            onClick={() => setCurrentPage(null)}
+                        >
+                            Back to Home
+                        </Button>
+                        <ChakraProvider>
+                            <EventsDiscovery />
+                        </ChakraProvider>
+                    </>
+                );
+            case 'job':
+                return (
+                    <>
+                        <Button
+                            variant="outlined"
+                            style={{ marginBottom: '20px', backgroundColor: '#9C27B0', color: 'white', borderColor: '#6A1B9A' }}
+                            onClick={() => setCurrentPage(null)}
+                        >
+                            Back to Home
+                        </Button>
+                        <ChakraProvider>
+                            <JobOpenings />
+                        </ChakraProvider>
+                    </>
+                );
             case 'messages':
                 return (
-                    <Messages userId={user.id} contactId={contactId} />
+                    <>
+                        <Button
+                            variant="outlined"
+                            style={{ marginBottom: '20px', backgroundColor: '#9C27B0', color: 'white', borderColor: '#6A1B9A' }}
+                            onClick={() => setCurrentPage(null)}
+                        >
+                            Back to Home
+                        </Button>
+                        <Messages userId={user.id} contactId={contactId} />
+                    </>
+                );
+            case 'connections':
+                return (
+                    <>
+                        <Button
+                            variant="outlined"
+                            style={{ marginBottom: '20px', backgroundColor: '#9C27B0', color: 'white', borderColor: '#6A1B9A' }}
+                            onClick={() => setCurrentPage(null)}
+                        >
+                            Back to Home
+                        </Button>
+                        <ConnectionForm senderEmail={user.email} />
+                        <PendingRequests userEmail={user.email} /> {/* Add PendingRequests component */}
+                    </>
                 );
             default:
                 return (
                     <>
-                        <div style={{ backgroundColor: 'white', minHeight: '100vh', borderRadius: '10px', padding: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Montserrat, sans-serif' }}>
+                        <div style={{ backgroundColor: 'white', minHeight: '100vh', borderRadius: '10px', padding: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Montserrat, sans-serif', color: 'white' }}>
                             <div style={{ textAlign: 'center', color: '#333', display: 'flex', alignItems: 'center' }}>
                                 <Avatar
                                     src="/avatar.png"
@@ -124,13 +178,12 @@ function HomePage({ user }) {
                                         fontSize: '1.7rem',
                                         borderRadius: '50px',
                                         fontFamily: 'Montserrat, sans-serif',
-                                        color: '#9200FF',
-                                        borderColor: '#9200FF',
+                                        color: '#FF5700',
+                                        borderColor: '#FF5700',
                                         padding: '20px',
                                         boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)'
                                     }}
                                     onClick={handleMessagesClick}
-                                    aria-describedby={id}
                                 >
                                     Messages
                                 </Button>
@@ -140,8 +193,8 @@ function HomePage({ user }) {
                                         fontSize: '1.7rem',
                                         borderRadius: '50px',
                                         fontFamily: 'Montserrat, sans-serif',
-                                        color: '#FF0097',
-                                        borderColor: '#FF0097',
+                                        color: '#8E24AA',
+                                        borderColor: '#8E24AA',
                                         padding: '20px',
                                         boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)'
                                     }}
@@ -150,54 +203,50 @@ function HomePage({ user }) {
                                     Connections
                                 </Button>
                             </div>
-                            <br /><br /><br />
-                            <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', fontFamily: 'Montserrat, sans-serif' }}>
-                                <p> Here is where you can customize your profile, or add relevant skills. Do remember this profile will be displayed to other users and could potentially affect your hireability.</p>
-                            </div>
                         </div>
-                        <Popover
-                            id={id}
-                            open={open}
-                            anchorEl={anchorEl}
-                            onClose={handleClose}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'center',
-                            }}
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'center',
-                            }}
-                        >
-                            <div style={{ padding: '20px' }}>
-                                <p>Who would you like to message with?</p>
-                                <TextField
-                                    label="Contact Email"
-                                    variant="outlined"
-                                    value={contactEmail}
-                                    onChange={(e) => setContactEmail(e.target.value)}
-                                    fullWidth
-                                />
-                                {error && <p style={{ color: 'red' }}>{error}</p>}
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    style={{ marginTop: '10px' }}
-                                    onClick={handleSendMessage}
-                                >
-                                    Send Message
-                                </Button>
-                            </div>
-                        </Popover>
                     </>
                 );
         }
     };
 
     return (
-        <main style={{ padding: '0 20px' }}>
+        <>
             {renderPage()}
-        </main>
+            <Popover
+                id={id}
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handleClose}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                }}
+            >
+                <div style={{ padding: '20px' }}>
+                    <p>Who would you like to message with?</p>
+                    <TextField
+                        label="Contact Email"
+                        variant="outlined"
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        fullWidth
+                    />
+                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        style={{ marginTop: '10px' }}
+                        onClick={handleSendMessage}
+                    >
+                        Send Message
+                    </Button>
+                </div>
+            </Popover>
+        </>
     );
 }
 
