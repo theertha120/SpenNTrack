@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './HomePage.css';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, TooltipItem } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels'; 
 
-ChartJS.register(Title, Tooltip, Legend, ArcElement);
+ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels); 
 
 const HomePage = () => {
   const [expenditures, setExpenditures] = useState([]);
@@ -45,20 +45,17 @@ const HomePage = () => {
       setCategory('');
       setName('');
       setCost('');
-
-
       const updatedExpenditures = await axios.get('http://localhost:5000/api/expenditures');
       setExpenditures(updatedExpenditures.data);
     } catch (error) {
       console.error('Error adding expenditure:', error);
     }
   };
-
   const deleteExpenditure = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/api/expenditures/${id}`);
       
-  
+   
       const updatedExpenditures = await axios.get('http://localhost:5000/api/expenditures');
       setExpenditures(updatedExpenditures.data);
     } catch (error) {
@@ -79,23 +76,9 @@ const HomePage = () => {
       }]
     };
 
-
     return {
       labels: data.labels,
-      datasets: data.datasets.map(dataset => ({
-        ...dataset,
-        datalabels: {
-          display: true,
-          formatter: (value, context) => {
-            let total = 0;
-            data.datasets.forEach(ds => {
-              total += ds.data.reduce((sum, val) => sum + val, 0);
-            });
-            const percentage = (value / total * 100).toFixed(2) + '%';
-            return percentage;
-          }
-        }
-      }))
+      datasets: data.datasets
     };
   };
 
@@ -137,8 +120,26 @@ const HomePage = () => {
       </div>
       
       <div className="button-spacing"></div>
-      <Pie data={getPieData()} className="Pie" />
+      <Pie data={getPieData()} className="Pie" options={{
+        plugins: {
+          datalabels: {
+            display: true,
+            formatter: (value, context) => {
+              let total = 0;
+              context.chart.data.datasets.forEach(ds => {
+                total += ds.data.reduce((sum, val) => sum + val, 0);
+              });
+              const percentage = (value / total * 100).toFixed(2) + '%';
+              return percentage;
+            },
+            color: '#fff',
+            anchor: 'end',
+            align: 'start',
+          }
+        }
+      }} />
       
+      <br></br>
       <h2>Expenditure Table</h2>
       {Object.entries(groupByCategory()).map(([cat, items]) => (
         <div key={cat}>
