@@ -1,13 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const { getExpenditures, addExpenditure } = require('../controllers/expenditureController');
+const {
+  getExpenditures,
+  addExpenditure,
+  deleteExpenditure
+} = require('../controllers/expenditureController'); // Ensure this path is correct
 
-// Ensure that the imported functions exist
-if (!getExpenditures || !addExpenditure) {
-  throw new Error('Route handlers not found');
-}
-
+// Get all expenditures
 router.get('/', getExpenditures);
+
+// Add a new expenditure
 router.post('/', addExpenditure);
+
+// Delete an expenditure by ID
+router.delete('/:id', deleteExpenditure);
 
 module.exports = router;
