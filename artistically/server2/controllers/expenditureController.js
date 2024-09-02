@@ -1,5 +1,6 @@
 const mysql = require('mysql2');
 
+// Create a MySQL connection
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
@@ -42,4 +43,20 @@ const addExpenditure = (req, res) => {
   );
 };
 
-module.exports = { getExpenditures, addExpenditure };
+const deleteExpenditure = (req, res) => {
+  const id = req.params.id;
+  connection.query(
+    'DELETE FROM expenditures WHERE id = ?', 
+    [id], 
+    (err) => {
+      if (err) {
+        console.error('Error deleting expenditure:', err);
+        res.status(500).send('Server error');
+        return;
+      }
+      res.status(200).send('Expenditure deleted');
+    }
+  );
+};
+
+module.exports = { getExpenditures, addExpenditure, deleteExpenditure };
