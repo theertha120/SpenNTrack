@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './HomePage.css';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 
@@ -29,13 +30,23 @@ const HomePage = () => {
 
   const addExpenditure = async () => {
     try {
-      await axios.post('http://localhost:5000/api/expenditures', { category, name, cost });
+      if (!category || !name || !cost) {
+        alert('Please fill all fields');
+        return;
+      }
+
+      const response = await axios.post('http://localhost:5000/api/expenditures', {
+        category,
+        name,
+        cost
+      });
+
       setCategory('');
       setName('');
       setCost('');
-      // Refresh expenditures
-      const response = await axios.get('http://localhost:5000/api/expenditures');
-      setExpenditures(response.data);
+
+      const updatedExpenditures = await axios.get('http://localhost:5000/api/expenditures');
+      setExpenditures(updatedExpenditures.data);
     } catch (error) {
       console.error('Error adding expenditure:', error);
     }
@@ -55,18 +66,89 @@ const HomePage = () => {
     };
     return data;
   };
+  const groupByCategory = () => {
+    return expenditures.reduce((acc, expenditure) => {
+      if (!acc[expenditure.category]) {
+        acc[expenditure.category] = [];
+      }
+      acc[expenditure.category].push(expenditure);
+      return acc;
+    }, {});
+  };
+
+  const calculateTotals = () => {
+    const totals = {};
+    let overallTotal = 0;
+
+    categories.forEach(cat => {
+      const categoryTotal = expenditures
+        .filter(exp => exp.category === cat)
+        .reduce((sum, exp) => sum + parseFloat(exp.cost), 0);
+      totals[cat] = categoryTotal;
+      overallTotal += categoryTotal;
+    });
+
+    return { totals, overallTotal };
+  };
+
+  const { totals, overallTotal } = calculateTotals();
 
   return (
-    <div>
-      <h1>Home</h1>
-      <input type="text" placeholder="Expenditure Name" value={name} onChange={(e) => setName(e.target.value)} />
-      <input type="number" placeholder="Cost" value={cost} onChange={(e) => setCost(e.target.value)} />
-      <select value={category} onChange={(e) => setCategory(e.target.value)}>
-        <option value="">Select Category</option>
-        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-      </select>
-      <button onClick={addExpenditure}>Add Expenditure</button>
-      <Pie data={getPieData()} />
+    <div className="home-page">
+      <h1>SpendNTrack!</h1>
+      
+      <div className="form-container">
+        <input
+          type="text"
+          placeholder="Expenditure Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Cost"
+          value={cost}
+          onChange={(e) => setCost(e.target.value)}
+        />
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="">Select Category</option>
+          {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+        </select>
+        <button onClick={addExpenditure}>Add Expenditure</button>
+      </div>
+      
+      <div className="pie-chart">
+        <Pie data={getPieData()} />
+      </div>
+      
+      <h2>Expenditure Table</h2>
+      {Object.entries(groupByCategory()).map(([cat, items]) => (
+        <div key={cat}>
+          <h3>{cat}</h3>
+          <p>Total Spent: ${totals[cat].toFixed(2)}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map(item => (
+                <tr key={item.id}>
+                  <td>{item.name}</td>
+                  <td>${item.cost}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+      
+      <h2>Total Spent Overall: ${overallTotal.toFixed(2)}</h2>
     </div>
   );
 };
