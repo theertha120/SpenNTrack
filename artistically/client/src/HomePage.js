@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './HomePage.css';
 import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, TooltipItem } from 'chart.js';
+import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels'; 
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels); 
@@ -51,11 +51,11 @@ const HomePage = () => {
       console.error('Error adding expenditure:', error);
     }
   };
+
   const deleteExpenditure = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/api/expenditures/${id}`);
       
-   
       const updatedExpenditures = await axios.get('http://localhost:5000/api/expenditures');
       setExpenditures(updatedExpenditures.data);
     } catch (error) {
@@ -120,24 +120,26 @@ const HomePage = () => {
       </div>
       
       <div className="button-spacing"></div>
-      <Pie data={getPieData()} className="Pie" options={{
-        plugins: {
-          datalabels: {
-            display: true,
-            formatter: (value, context) => {
-              let total = 0;
-              context.chart.data.datasets.forEach(ds => {
-                total += ds.data.reduce((sum, val) => sum + val, 0);
-              });
-              const percentage = (value / total * 100).toFixed(2) + '%';
-              return percentage;
-            },
-            color: '#fff',
-            anchor: 'end',
-            align: 'start',
+      <div className="pie-chart">
+        <Pie data={getPieData()} options={{
+          plugins: {
+            datalabels: {
+              display: true,
+              formatter: (value, context) => {
+                let total = 0;
+                context.chart.data.datasets.forEach(ds => {
+                  total += ds.data.reduce((sum, val) => sum + val, 0);
+                });
+                const percentage = (value / total * 100).toFixed(2) + '%';
+                return percentage;
+              },
+              color: '#fff',
+              anchor: 'end',
+              align: 'start',
+            }
           }
-        }
-      }} />
+        }} />
+      </div>
       
       <br></br>
       <h2>Expenditure Table</h2>
