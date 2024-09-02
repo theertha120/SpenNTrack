@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './HomePage.css';
 import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, TooltipItem } from 'chart.js';
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement);
 
@@ -45,7 +46,7 @@ const HomePage = () => {
       setName('');
       setCost('');
 
-      // Fetch updated expenditures
+
       const updatedExpenditures = await axios.get('http://localhost:5000/api/expenditures');
       setExpenditures(updatedExpenditures.data);
     } catch (error) {
@@ -57,7 +58,7 @@ const HomePage = () => {
     try {
       await axios.delete(`http://localhost:5000/api/expenditures/${id}`);
       
-      // Fetch updated expenditures
+  
       const updatedExpenditures = await axios.get('http://localhost:5000/api/expenditures');
       setExpenditures(updatedExpenditures.data);
     } catch (error) {
@@ -77,7 +78,25 @@ const HomePage = () => {
         backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
       }]
     };
-    return data;
+
+
+    return {
+      labels: data.labels,
+      datasets: data.datasets.map(dataset => ({
+        ...dataset,
+        datalabels: {
+          display: true,
+          formatter: (value, context) => {
+            let total = 0;
+            data.datasets.forEach(ds => {
+              total += ds.data.reduce((sum, val) => sum + val, 0);
+            });
+            const percentage = (value / total * 100).toFixed(2) + '%';
+            return percentage;
+          }
+        }
+      }))
+    };
   };
 
   const groupByCategory = () => {
@@ -94,31 +113,32 @@ const HomePage = () => {
     <div>
       <h1>SpendNTrack!</h1>
       
-      <input
-        type="text"
-        placeholder="Expenditure Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="Cost"
-        value={cost}
-        onChange={(e) => setCost(e.target.value)}
-      />
-      <select
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-      >
-        <option value="">Select Category</option>
-        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-      </select>
-      <button onClick={addExpenditure}>Add Expenditure</button>
+      <div className="form-container">
+        <input
+          type="text"
+          placeholder="Expenditure Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Cost"
+          value={cost}
+          onChange={(e) => setCost(e.target.value)}
+        />
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="">Select Category</option>
+          {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+        </select>
+        <button onClick={addExpenditure}>Add Expenditure</button>
+      </div>
       
+      <div className="button-spacing"></div>
+      <Pie data={getPieData()} className="Pie" />
       
-      <Pie data={getPieData()} />
-      
-      <br></br>
       <h2>Expenditure Table</h2>
       {Object.entries(groupByCategory()).map(([cat, items]) => (
         <div key={cat}>
@@ -137,7 +157,7 @@ const HomePage = () => {
                   <td>{item.name}</td>
                   <td>{item.cost}</td>
                   <td>
-                    <button onClick={() => deleteExpenditure(item.id)}>Delete</button>
+                    <button className="delete-button" onClick={() => deleteExpenditure(item.id)}>Delete</button>
                   </td>
                 </tr>
               ))}
