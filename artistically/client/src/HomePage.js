@@ -123,11 +123,12 @@ const HomePage = () => {
       <div className="pie-chart">
         <Pie data={getPieData()} />
       </div>
-      
-      <h2>Expenditure Table</h2>
+
+      <br></br>
+      <h1>Expenditure Table</h1>
       {Object.entries(groupByCategory()).map(([cat, items]) => (
         <div key={cat}>
-          <h3>{cat}</h3>
+          <h2>{cat}</h2>
           <p>Total Spent: ${totals[cat].toFixed(2)}</p>
           <table>
             <thead>
