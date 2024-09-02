@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const expenditureRoutes = require('./routes/expenditures');
+const expenditureRoutes = require('./routes/expenditures'); // Ensure this path is correct
 
 const app = express();
 app.use(cors());
