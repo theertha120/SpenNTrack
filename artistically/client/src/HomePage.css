@@ -9,8 +9,6 @@ h1, h2, h3 {
   text-align: center;
   color: #333;
 }
-
-
 .form-container {
   display: flex;
   flex-direction: column;
@@ -43,9 +41,17 @@ button:hover {
 .pie-chart {
   display: flex;
   justify-content: center;
-  margin: 20px;
-  width: 100%;
+  align-items: center;
+  margin: 20px auto; 
+  width: 400px;      
+  height: 400px;     
 }
+
+.pie-chart canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 
 table {
   width: 80%;
