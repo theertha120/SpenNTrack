@@ -35,7 +35,7 @@ const HomePage = () => {
         return;
       }
 
-      const response = await axios.post('http://localhost:5000/api/expenditures', {
+      await axios.post('http://localhost:5000/api/expenditures', {
         category,
         name,
         cost
@@ -45,10 +45,23 @@ const HomePage = () => {
       setName('');
       setCost('');
 
+      // Fetch updated expenditures
       const updatedExpenditures = await axios.get('http://localhost:5000/api/expenditures');
       setExpenditures(updatedExpenditures.data);
     } catch (error) {
       console.error('Error adding expenditure:', error);
+    }
+  };
+
+  const deleteExpenditure = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/expenditures/${id}`);
+      
+      // Fetch updated expenditures
+      const updatedExpenditures = await axios.get('http://localhost:5000/api/expenditures');
+      setExpenditures(updatedExpenditures.data);
+    } catch (error) {
+      console.error('Error deleting expenditure:', error);
     }
   };
 
@@ -66,6 +79,7 @@ const HomePage = () => {
     };
     return data;
   };
+
   const groupByCategory = () => {
     return expenditures.reduce((acc, expenditure) => {
       if (!acc[expenditure.category]) {
@@ -76,80 +90,61 @@ const HomePage = () => {
     }, {});
   };
 
-  const calculateTotals = () => {
-    const totals = {};
-    let overallTotal = 0;
-
-    categories.forEach(cat => {
-      const categoryTotal = expenditures
-        .filter(exp => exp.category === cat)
-        .reduce((sum, exp) => sum + parseFloat(exp.cost), 0);
-      totals[cat] = categoryTotal;
-      overallTotal += categoryTotal;
-    });
-
-    return { totals, overallTotal };
-  };
-
-  const { totals, overallTotal } = calculateTotals();
-
   return (
-    <div className="home-page">
+    <div>
       <h1>SpendNTrack!</h1>
       
-      <div className="form-container">
-        <input
-          type="text"
-          placeholder="Expenditure Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Cost"
-          value={cost}
-          onChange={(e) => setCost(e.target.value)}
-        />
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option value="">Select Category</option>
-          {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-        </select>
-        <button onClick={addExpenditure}>Add Expenditure</button>
-      </div>
+      <input
+        type="text"
+        placeholder="Expenditure Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Cost"
+        value={cost}
+        onChange={(e) => setCost(e.target.value)}
+      />
+      <select
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+      >
+        <option value="">Select Category</option>
+        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+      </select>
+      <button onClick={addExpenditure}>Add Expenditure</button>
       
-      <div className="pie-chart">
-        <Pie data={getPieData()} />
-      </div>
-
+      
+      <Pie data={getPieData()} />
+      
       <br></br>
-      <h1>Expenditure Table</h1>
+      <h2>Expenditure Table</h2>
       {Object.entries(groupByCategory()).map(([cat, items]) => (
         <div key={cat}>
-          <h2>{cat}</h2>
-          <p>Total Spent: ${totals[cat].toFixed(2)}</p>
+          <h3>{cat} - Total: ${items.reduce((sum, item) => sum + parseFloat(item.cost), 0).toFixed(2)}</h3>
           <table>
             <thead>
               <tr>
                 <th>Name</th>
                 <th>Cost</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {items.map(item => (
                 <tr key={item.id}>
                   <td>{item.name}</td>
-                  <td>${item.cost}</td>
+                  <td>{item.cost}</td>
+                  <td>
+                    <button onClick={() => deleteExpenditure(item.id)}>Delete</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       ))}
-      
-      <h2>Total Spent Overall: ${overallTotal.toFixed(2)}</h2>
     </div>
   );
 };
